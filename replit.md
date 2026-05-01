@@ -46,6 +46,17 @@ pnpm workspace monorepo using TypeScript. A full-stack Bengali e-commerce booksh
 - `offers` - Discount/offer system
 - `orders` - Order management with payment methods
 
+## GitHub Auto-Sync
+
+Repository: https://github.com/iqbalhimel005/aloromela
+
+Every git commit (including Replit checkpoints) automatically syncs to GitHub via:
+- **Hook**: `.git/hooks/post-commit` — runs after every commit
+- **Script**: `scripts/github-sync.mjs` — detects changed files and uploads via GitHub API
+- **State**: `.local/.github-sync-sha` — tracks last synced commit (gitignored, local only)
+
+The sync runs in the background and does not block development.
+
 ## Key Commands
 
 - `pnpm run typecheck` — full typecheck across all packages
@@ -53,5 +64,6 @@ pnpm workspace monorepo using TypeScript. A full-stack Bengali e-commerce booksh
 - `pnpm --filter @workspace/api-spec run codegen` — regenerate API hooks and Zod schemas from OpenAPI spec
 - `pnpm --filter @workspace/db run push` — push DB schema changes (dev only)
 - `pnpm --filter @workspace/api-server run dev` — run API server locally
+- `node scripts/github-sync.mjs` — manually trigger GitHub sync
 
 See the `pnpm-workspace` skill for workspace structure, TypeScript setup, and package details.
