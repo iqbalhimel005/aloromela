@@ -1,0 +1,20 @@
+uploads = []
+outputs = []
+
+[[generated]]
+id = "cpCSRkSnmqprMlXV-P8NV"
+uri = "file://artifacts/aloromela/src/assets/watermark.png"
+type = "image"
+title = "sea swing reading watermark"
+
+[[generated]]
+id = "yAMWhvosjB1Vux9K49IdQ"
+uri = "file://artifacts/aloromela/public/books/rich-dad-poor-dad.png"
+type = "image"
+title = "generated_image"
+
+[[generated]]
+id = "X8M-X_xRu5FHB3UUelUpY"
+uri = "file://artifacts/aloromela-app/assets/images/icon.png"
+type = "image"
+title = "aloromela book app icon"

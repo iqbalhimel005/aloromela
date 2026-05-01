@@ -1,0 +1,992 @@
+openapi: 3.1.0
+info:
+  # Do not change the title, if the title changes, the import paths will be broken
+  title: Api
+  version: 0.1.0
+  description: আলোরমেলা বুকশপ API specification
+servers:
+  - url: /api
+    description: Base API path
+tags:
+  - name: health
+    description: Health operations
+  - name: books
+    description: Book operations
+  - name: customers
+    description: Customer operations
+  - name: sell-requests
+    description: Sell request operations
+  - name: book-requests
+    description: Book demand/request operations
+  - name: author-ads
+    description: Author advertisement operations
+  - name: offers
+    description: Offer and discount operations
+
+paths:
+  /healthz:
+    get:
+      operationId: healthCheck
+      tags: [health]
+      summary: Health check
+      description: Returns server health status
+      responses:
+        "200":
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+
+  /books:
+    get:
+      operationId: listBooks
+      tags: [books]
+      summary: List books
+      description: List books with optional category filter
+      parameters:
+        - name: category
+          in: query
+          schema:
+            $ref: "#/components/schemas/BookCategory"
+        - name: search
+          in: query
+          schema:
+            type: string
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 12
+      responses:
+        "200":
+          description: List of books
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BookListResponse"
+
+  /books/{id}:
+    get:
+      operationId: getBook
+      tags: [books]
+      summary: Get book by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Book details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Book"
+        "404":
+          description: Book not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /books/featured:
+    get:
+      operationId: getFeaturedBooks
+      tags: [books]
+      summary: Get featured books
+      description: Get featured/highlighted books for homepage
+      responses:
+        "200":
+          description: Featured books
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Book"
+
+  /books/stats:
+    get:
+      operationId: getBookStats
+      tags: [books]
+      summary: Get book statistics
+      description: Category-wise book counts for homepage
+      responses:
+        "200":
+          description: Book stats
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BookStats"
+
+  /customers:
+    post:
+      operationId: registerCustomer
+      tags: [customers]
+      summary: Register a new customer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateCustomerBody"
+      responses:
+        "201":
+          description: Customer registered
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Customer"
+        "400":
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /customers/verify-otp:
+    post:
+      operationId: verifyOtp
+      tags: [customers]
+      summary: Verify OTP for mobile number
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/VerifyOtpBody"
+      responses:
+        "200":
+          description: OTP verified
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OtpVerifyResponse"
+        "400":
+          description: Invalid OTP
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /customers/send-otp:
+    post:
+      operationId: sendOtp
+      tags: [customers]
+      summary: Send OTP to mobile number
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SendOtpBody"
+      responses:
+        "200":
+          description: OTP sent
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OtpSendResponse"
+
+  /sell-requests:
+    post:
+      operationId: createSellRequest
+      tags: [sell-requests]
+      summary: Submit a book sell request
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateSellRequestBody"
+      responses:
+        "201":
+          description: Sell request submitted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SellRequest"
+        "400":
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+    get:
+      operationId: listSellRequests
+      tags: [sell-requests]
+      summary: List sell requests
+      responses:
+        "200":
+          description: List of sell requests
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/SellRequest"
+
+  /book-requests:
+    post:
+      operationId: createBookRequest
+      tags: [book-requests]
+      summary: Submit a book demand/request
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateBookRequestBody"
+      responses:
+        "201":
+          description: Book request submitted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BookRequest"
+
+    get:
+      operationId: listBookRequests
+      tags: [book-requests]
+      summary: List book requests
+      responses:
+        "200":
+          description: List of book requests
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/BookRequest"
+
+  /author-ads:
+    post:
+      operationId: createAuthorAd
+      tags: [author-ads]
+      summary: Submit an author advertisement
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateAuthorAdBody"
+      responses:
+        "201":
+          description: Author ad submitted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthorAd"
+
+    get:
+      operationId: listAuthorAds
+      tags: [author-ads]
+      summary: List author advertisements
+      responses:
+        "200":
+          description: List of author ads
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/AuthorAd"
+
+  /offers:
+    get:
+      operationId: listOffers
+      tags: [offers]
+      summary: List active offers and discounts
+      responses:
+        "200":
+          description: List of active offers
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Offer"
+
+  /orders:
+    post:
+      operationId: createOrder
+      tags: [books]
+      summary: Place a book order
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateOrderBody"
+      responses:
+        "201":
+          description: Order placed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Order"
+
+components:
+  schemas:
+    BookCategory:
+      type: string
+      enum:
+        - school-play
+        - school-nursery
+        - school-kg1
+        - school-kg2
+        - school-class3
+        - school-class4
+        - school-class5
+        - school-class6
+        - school-class7
+        - school-class8
+        - school-class9
+        - school-class10
+        - college-science
+        - college-arts
+        - college-commerce
+        - degree-year1
+        - degree-year2
+        - degree-year3
+        - honours-physics-year1
+        - honours-physics-year2
+        - honours-physics-year3
+        - honours-physics-year4
+        - honours-physics-masters-preli
+        - honours-physics-masters-honours
+        - honours-chemistry-year1
+        - honours-chemistry-year2
+        - honours-chemistry-year3
+        - honours-chemistry-year4
+        - honours-chemistry-masters-preli
+        - honours-chemistry-masters-honours
+        - honours-math-year1
+        - honours-math-year2
+        - honours-math-year3
+        - honours-math-year4
+        - honours-math-masters-preli
+        - honours-math-masters-honours
+        - honours-zoology-year1
+        - honours-zoology-year2
+        - honours-zoology-year3
+        - honours-zoology-year4
+        - honours-zoology-masters-preli
+        - honours-zoology-masters-honours
+        - honours-botany-year1
+        - honours-botany-year2
+        - honours-botany-year3
+        - honours-botany-year4
+        - honours-botany-masters-preli
+        - honours-botany-masters-honours
+        - honours-history-year1
+        - honours-history-year2
+        - honours-history-year3
+        - honours-history-year4
+        - honours-history-masters-preli
+        - honours-history-masters-honours
+        - honours-islamic-history-year1
+        - honours-islamic-history-year2
+        - honours-islamic-history-year3
+        - honours-islamic-history-year4
+        - honours-islamic-history-masters-preli
+        - honours-islamic-history-masters-honours
+        - honours-social-welfare-year1
+        - honours-social-welfare-year2
+        - honours-social-welfare-year3
+        - honours-social-welfare-year4
+        - honours-social-welfare-masters-preli
+        - honours-social-welfare-masters-honours
+        - honours-geography-year1
+        - honours-geography-year2
+        - honours-geography-year3
+        - honours-geography-year4
+        - honours-geography-masters-preli
+        - honours-geography-masters-honours
+        - honours-accounting-year1
+        - honours-accounting-year2
+        - honours-accounting-year3
+        - honours-accounting-year4
+        - honours-accounting-masters-preli
+        - honours-accounting-masters-honours
+        - honours-economics-year1
+        - honours-economics-year2
+        - honours-economics-year3
+        - honours-economics-year4
+        - honours-economics-masters-preli
+        - honours-economics-masters-honours
+        - honours-management-year1
+        - honours-management-year2
+        - honours-management-year3
+        - honours-management-year4
+        - honours-management-masters-preli
+        - honours-management-masters-honours
+        - honours-philosophy-year1
+        - honours-philosophy-year2
+        - honours-philosophy-year3
+        - honours-philosophy-year4
+        - honours-philosophy-masters-preli
+        - honours-philosophy-masters-honours
+        - honours-political-science-year1
+        - honours-political-science-year2
+        - honours-political-science-year3
+        - honours-political-science-year4
+        - honours-political-science-masters-preli
+        - honours-political-science-masters-honours
+        - honours-bengali-year1
+        - honours-bengali-year2
+        - honours-bengali-year3
+        - honours-bengali-year4
+        - honours-bengali-masters-preli
+        - honours-bengali-masters-honours
+        - honours-english-year1
+        - honours-english-year2
+        - honours-english-year3
+        - honours-english-year4
+        - honours-english-masters-preli
+        - honours-english-masters-honours
+        - job
+        - novel
+        - story-poem
+
+    HealthStatus:
+      type: object
+      properties:
+        status:
+          type: string
+      required:
+        - status
+
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+        message:
+          type: string
+      required:
+        - error
+
+    Book:
+      type: object
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        titleBn:
+          type: string
+        author:
+          type: string
+        authorBn:
+          type: string
+        publisher:
+          type: string
+        publisherBn:
+          type: string
+        price:
+          type: number
+        discountedPrice:
+          type: number
+        category:
+          $ref: "#/components/schemas/BookCategory"
+        coverImage:
+          type: string
+        description:
+          type: string
+        descriptionBn:
+          type: string
+        previewText:
+          type: string
+        previewTextBn:
+          type: string
+        isbn:
+          type: string
+        edition:
+          type: string
+        stockCount:
+          type: integer
+        rating:
+          type: number
+        reviewCount:
+          type: integer
+        isFeatured:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - title
+        - titleBn
+        - author
+        - authorBn
+        - price
+        - category
+        - coverImage
+        - stockCount
+        - isFeatured
+        - createdAt
+
+    BookListResponse:
+      type: object
+      properties:
+        books:
+          type: array
+          items:
+            $ref: "#/components/schemas/Book"
+        total:
+          type: integer
+        page:
+          type: integer
+        totalPages:
+          type: integer
+      required:
+        - books
+        - total
+        - page
+        - totalPages
+
+    BookStats:
+      type: object
+      properties:
+        total:
+          type: integer
+        school:
+          type: integer
+        college:
+          type: integer
+        degree:
+          type: integer
+        honours:
+          type: integer
+        job:
+          type: integer
+        novel:
+          type: integer
+        storyPoem:
+          type: integer
+      required:
+        - total
+        - school
+        - college
+        - degree
+        - honours
+        - job
+        - novel
+        - storyPoem
+
+    Customer:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        mobile:
+          type: string
+        district:
+          type: string
+        upazila:
+          type: string
+        postOffice:
+          type: string
+        village:
+          type: string
+        isVerified:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - name
+        - mobile
+        - district
+        - upazila
+        - isVerified
+        - createdAt
+
+    CreateCustomerBody:
+      type: object
+      properties:
+        name:
+          type: string
+        mobile:
+          type: string
+        district:
+          type: string
+        upazila:
+          type: string
+        postOffice:
+          type: string
+        village:
+          type: string
+      required:
+        - name
+        - mobile
+        - district
+        - upazila
+
+    SendOtpBody:
+      type: object
+      properties:
+        mobile:
+          type: string
+      required:
+        - mobile
+
+    OtpSendResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        otp:
+          type: string
+          description: Demo OTP (only in development)
+      required:
+        - success
+        - message
+
+    VerifyOtpBody:
+      type: object
+      properties:
+        mobile:
+          type: string
+        otp:
+          type: string
+      required:
+        - mobile
+        - otp
+
+    OtpVerifyResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        customerId:
+          type: integer
+      required:
+        - success
+        - message
+
+    SellRequest:
+      type: object
+      properties:
+        id:
+          type: integer
+        sellerName:
+          type: string
+        mobile:
+          type: string
+        bookTitle:
+          type: string
+        bookAuthor:
+          type: string
+        category:
+          $ref: "#/components/schemas/BookCategory"
+        condition:
+          type: string
+          enum: [new, good, fair]
+        askingPrice:
+          type: number
+        description:
+          type: string
+        status:
+          type: string
+          enum: [pending, reviewed, accepted, rejected]
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - sellerName
+        - mobile
+        - bookTitle
+        - category
+        - condition
+        - askingPrice
+        - status
+        - createdAt
+
+    CreateSellRequestBody:
+      type: object
+      properties:
+        sellerName:
+          type: string
+        mobile:
+          type: string
+        bookTitle:
+          type: string
+        bookAuthor:
+          type: string
+        category:
+          $ref: "#/components/schemas/BookCategory"
+        condition:
+          type: string
+          enum: [new, good, fair]
+        askingPrice:
+          type: number
+        description:
+          type: string
+      required:
+        - sellerName
+        - mobile
+        - bookTitle
+        - category
+        - condition
+        - askingPrice
+
+    BookRequest:
+      type: object
+      properties:
+        id:
+          type: integer
+        requesterName:
+          type: string
+        mobile:
+          type: string
+        bookTitle:
+          type: string
+        bookAuthor:
+          type: string
+        category:
+          $ref: "#/components/schemas/BookCategory"
+        notes:
+          type: string
+        status:
+          type: string
+          enum: [pending, found, unavailable]
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - requesterName
+        - mobile
+        - bookTitle
+        - status
+        - createdAt
+
+    CreateBookRequestBody:
+      type: object
+      properties:
+        requesterName:
+          type: string
+        mobile:
+          type: string
+        bookTitle:
+          type: string
+        bookAuthor:
+          type: string
+        category:
+          $ref: "#/components/schemas/BookCategory"
+        notes:
+          type: string
+      required:
+        - requesterName
+        - mobile
+        - bookTitle
+
+    AuthorAd:
+      type: object
+      properties:
+        id:
+          type: integer
+        authorName:
+          type: string
+        mobile:
+          type: string
+        email:
+          type: string
+        bookTitle:
+          type: string
+        bookDescription:
+          type: string
+        genre:
+          type: string
+        publisherName:
+          type: string
+        publishYear:
+          type: integer
+        price:
+          type: number
+        coverImage:
+          type: string
+        status:
+          type: string
+          enum: [pending, approved, rejected]
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - authorName
+        - mobile
+        - bookTitle
+        - bookDescription
+        - genre
+        - status
+        - createdAt
+
+    CreateAuthorAdBody:
+      type: object
+      properties:
+        authorName:
+          type: string
+        mobile:
+          type: string
+        email:
+          type: string
+        bookTitle:
+          type: string
+        bookDescription:
+          type: string
+        genre:
+          type: string
+        publisherName:
+          type: string
+        publishYear:
+          type: integer
+        price:
+          type: number
+      required:
+        - authorName
+        - mobile
+        - bookTitle
+        - bookDescription
+        - genre
+
+    Offer:
+      type: object
+      properties:
+        id:
+          type: integer
+        titleBn:
+          type: string
+        descriptionBn:
+          type: string
+        discountPercent:
+          type: integer
+        startDate:
+          type: string
+          format: date-time
+        endDate:
+          type: string
+          format: date-time
+        isActive:
+          type: boolean
+        badgeText:
+          type: string
+        category:
+          $ref: "#/components/schemas/BookCategory"
+      required:
+        - id
+        - titleBn
+        - descriptionBn
+        - discountPercent
+        - isActive
+
+    CreateOrderBody:
+      type: object
+      properties:
+        customerId:
+          type: integer
+        customerName:
+          type: string
+        mobile:
+          type: string
+        address:
+          type: string
+        items:
+          type: array
+          items:
+            type: object
+            properties:
+              bookId:
+                type: integer
+              quantity:
+                type: integer
+            required:
+              - bookId
+              - quantity
+        paymentMethod:
+          type: string
+          enum: [cash, bkash, rocket, nagad, sonali-bank, islami-bank]
+        paymentNumber:
+          type: string
+        notes:
+          type: string
+      required:
+        - customerName
+        - mobile
+        - address
+        - items
+        - paymentMethod
+
+    Order:
+      type: object
+      properties:
+        id:
+          type: integer
+        orderNumber:
+          type: string
+        customerId:
+          type: integer
+        customerName:
+          type: string
+        mobile:
+          type: string
+        address:
+          type: string
+        items:
+          type: array
+          items:
+            type: object
+            properties:
+              bookId:
+                type: integer
+              bookTitle:
+                type: string
+              quantity:
+                type: integer
+              price:
+                type: number
+            required:
+              - bookId
+              - bookTitle
+              - quantity
+              - price
+        totalAmount:
+          type: number
+        paymentMethod:
+          type: string
+        status:
+          type: string
+          enum: [pending, confirmed, shipped, delivered, cancelled]
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - orderNumber
+        - customerName
+        - mobile
+        - address
+        - items
+        - totalAmount
+        - paymentMethod
+        - status
+        - createdAt
